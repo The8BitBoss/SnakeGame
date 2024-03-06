@@ -18,7 +18,7 @@ int main()
     // TODO: 
     // Create an instance of the SFML RenderWindow type which represents the display
     // and initialise its size and title text    
-
+    sf::RenderWindow window(sf::VideoMode(800, 600), "Snake");
     // We can still output to the console window
     std::cout << "SnakeGame: Starting" << std::endl;
 
