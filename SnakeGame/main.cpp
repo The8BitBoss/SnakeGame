@@ -11,21 +11,66 @@
 // SFML header file for graphics, there are also ones for Audio, Window, System and Network
 #include <SFML/Graphics.hpp>
 int n{ 50 }, m{ 37 };
-int size{ 16 };
-int gScreenWidth{ size * n };
-int gScreenHeight{ size * m };
+int spriteSize{ 16 };
+int gScreenWidth{ spriteSize * n };
+int gScreenHeight{ spriteSize * m };
 
-int dir, num = 4;
+int dir, lastDir, num = 5
+;
 
+struct Pos
+{   float x, y;   } snakeSegments[100], fruits[5];
+
+enum EDirection
+{
+    eRight,
+    eDown,
+    eLeft,
+    eUp
+};
+
+void Tick()
+{
+    for (int i = num; i > 0; --i)
+    {
+        snakeSegments[i].x = snakeSegments[i - 1].x;
+        snakeSegments[i].y = snakeSegments[i - 1].y;
+
+    }
+    if (dir == (lastDir + 2) % 4)
+        dir = lastDir;
+        switch (dir)
+        {
+        case EDirection::eUp:
+            snakeSegments[0].y -= 1;
+            break;
+        case EDirection::eLeft:
+            snakeSegments[0].x -= 1;
+            break;
+        case EDirection::eRight:
+            snakeSegments[0].x += 1;
+            break;
+        case EDirection::eDown:
+            snakeSegments[0].y += 1;
+            break;
+        }
+        lastDir = dir;
+        for (int i = 0; i < 5; i++)
+        {
+            if ((snakeSegments[0].x == fruits[i].x) && (snakeSegments[0].y == fruits[i].y))
+            {
+                num++;
+                fruits[i].x = rand() % n;
+                fruits[i].y = rand() % m;
+            }
+        }
+}
 int main()
 {
-    // All SFML types and functions are contained in the sf namespace
-
-    // TODO: 
-    // Create an instance of the SFML RenderWindow type which represents the display
-    // and initialise its size and title text    
+    ///////////////   Create Window ///////////////////
     sf::RenderWindow window(sf::VideoMode(gScreenWidth, gScreenHeight), "Snake");
 
+    //////// Load Sprites //////////
     sf::Texture t1,tS;
     if (!t1.loadFromFile("Assets/white.png")||!tS.loadFromFile("Assets/red.png"))
     {
@@ -33,17 +78,26 @@ int main()
         return 0;
     }
     sf::Sprite sprite1(t1), spriteSnake(tS);
-    // We can still output to the console window
-    std::cout << "SnakeGame: Starting" << std::endl;
 
-    // TODO:
-    // Make a main loop that continues until we call window.close()  
+    ///////////  Timer Setup //////
+    sf::Clock clock;
+    float timer{ 0 }, delay{ 0.1 };
+
+    for (int i = 0; i < 5; i++)
+    {
+            fruits[i].x = rand() % n;
+            fruits[i].y = rand() % m;
+    }
+
+    //////////////  Run Game ///////////////
     while (window.isOpen())
     {
-        // {
-            // Inside the lopp:
-            // Poll for events from the window and handle the closed one  
-        // Event checker ***************************
+        ///////////////   Timer increment ///////////////
+        float time = clock.getElapsedTime().asSeconds();
+        clock.restart();
+        timer += time;
+
+        ////////////////// Event checker ////////////////
         sf::Event event;
         while (window.pollEvent(event))
         {
@@ -52,19 +106,44 @@ int main()
                 window.close();
             }
         }
-        //******************************************
+
+        ////////////   Direction input checker  ///////////////
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+            dir = EDirection::eLeft;
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+            dir = EDirection::eRight;
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+            dir = EDirection::eUp;
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+            dir = EDirection::eDown;
+
+
+        //////////////   Tick     /////////////////////
+        if (timer > delay) { timer = 0; Tick(); }
+        ///////////////////  Drawing  /////////////////////
         window.clear(sf::Color(0,0,0,255));
 
         for (int i = 0; i < n; i++)
+        {
             for (int j = 0; j < m; j++)
             {
-                sprite1.setPosition(i * size, j * size);  window.draw(sprite1);
+                sprite1.setPosition(i * spriteSize, j * spriteSize);  window.draw(sprite1);
             }
+        }
+        for (int i = 0; i < num; i++)
+        {
+            spriteSnake.setPosition(snakeSegments[i].x*spriteSize, snakeSegments[i].y*spriteSize);
+            window.draw(spriteSnake);
+        }
+
+        for (int i = 0; i < 5; i++)
+        {
+            spriteSnake.setPosition(fruits[i].x * spriteSize, fruits[i].y * spriteSize);
+            window.draw(spriteSnake);
+        }
 
         window.display();
-            // Clear the window to a colour
-            // Display the window contents
-        // }
+        ////////////////////////////////////
     }
     std::cout << "SnakeGame: Finished" << std::endl;
 
