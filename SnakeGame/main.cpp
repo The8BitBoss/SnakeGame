@@ -8,6 +8,11 @@
 
 #include <iostream>
 
+// todo
+// die
+// border
+// 
+
 // SFML header file for graphics, there are also ones for Audio, Window, System and Network
 #include <SFML/Graphics.hpp>
 int n{ 50 }, m{ 37 };
@@ -15,9 +20,9 @@ int spriteSize{ 16 };
 int gScreenWidth{ spriteSize * n };
 int gScreenHeight{ spriteSize * m };
 
-int dir, lastDir, num = 5
-;
 
+int dir, lastDir, num = 5;
+bool dead;
 struct Pos
 {   float x, y;   } snakeSegments[100], fruits[5];
 
@@ -31,39 +36,55 @@ enum EDirection
 
 void Tick()
 {
+    if (dead)
+    {
+        return;
+    }
     for (int i = num; i > 0; --i)
     {
         snakeSegments[i].x = snakeSegments[i - 1].x;
         snakeSegments[i].y = snakeSegments[i - 1].y;
-
     }
     if (dir == (lastDir + 2) % 4)
+    {
         dir = lastDir;
-        switch (dir)
+    }
+    switch (dir)
+    {
+    case EDirection::eUp:
+        snakeSegments[0].y -= 1;
+        break;
+    case EDirection::eLeft:
+        snakeSegments[0].x -= 1;
+        break;
+    case EDirection::eRight:
+        snakeSegments[0].x += 1;
+        break;
+    case EDirection::eDown:
+        snakeSegments[0].y += 1;
+        break;
+    }
+    for (int i = num; i > 1; --i)
+    {
+
+        if (snakeSegments[0].x == snakeSegments[i].x && snakeSegments[0].y == snakeSegments[i].y)
         {
-        case EDirection::eUp:
-            snakeSegments[0].y -= 1;
-            break;
-        case EDirection::eLeft:
-            snakeSegments[0].x -= 1;
-            break;
-        case EDirection::eRight:
-            snakeSegments[0].x += 1;
-            break;
-        case EDirection::eDown:
-            snakeSegments[0].y += 1;
-            break;
+            dead = true;
         }
-        lastDir = dir;
-        for (int i = 0; i < 5; i++)
-        {
-            if ((snakeSegments[0].x == fruits[i].x) && (snakeSegments[0].y == fruits[i].y))
-            {
-                num++;
-                fruits[i].x = rand() % n;
-                fruits[i].y = rand() % m;
-            }
-        }
+    }
+
+        //check for collision
+       lastDir = dir;
+       for (int i = 0; i < 5; i++)
+       {
+           if ((snakeSegments[0].x == fruits[i].x) && (snakeSegments[0].y == fruits[i].y))
+           {
+               num++;
+               fruits[i].x = rand() % n;
+               fruits[i].y = rand() % m;
+           }
+
+       }
 }
 int main()
 {
