@@ -7,14 +7,20 @@
 */
 
 #include <iostream>
+#include "linkedlist.h"
 
 // todo
+// list snake
 // die
 // border
 // 
 
 // SFML header file for graphics, there are also ones for Audio, Window, System and Network
 #include <SFML/Graphics.hpp>
+void Tick();
+
+SnakeLinkedList snake1(sf::Vector2f(0,0));
+
 int n{ 50 }, m{ 37 };
 int spriteSize{ 16 };
 int gScreenWidth{ spriteSize * n };
@@ -26,68 +32,10 @@ bool dead;
 struct Pos
 {   float x, y;   } snakeSegments[100], fruits[5];
 
-enum EDirection
-{
-    eRight,
-    eDown,
-    eLeft,
-    eUp
-};
-
-void Tick()
-{
-    if (dead)
-    {
-        return;
-    }
-    for (int i = num; i > 0; --i)
-    {
-        snakeSegments[i].x = snakeSegments[i - 1].x;
-        snakeSegments[i].y = snakeSegments[i - 1].y;
-    }
-    if (dir == (lastDir + 2) % 4)
-    {
-        dir = lastDir;
-    }
-    switch (dir)
-    {
-    case EDirection::eUp:
-        snakeSegments[0].y -= 1;
-        break;
-    case EDirection::eLeft:
-        snakeSegments[0].x -= 1;
-        break;
-    case EDirection::eRight:
-        snakeSegments[0].x += 1;
-        break;
-    case EDirection::eDown:
-        snakeSegments[0].y += 1;
-        break;
-    }
-    for (int i = num; i > 1; --i)
-    {
-
-        if (snakeSegments[0].x == snakeSegments[i].x && snakeSegments[0].y == snakeSegments[i].y)
-        {
-            dead = true;
-        }
-    }
-
-        //check for collision
-       lastDir = dir;
-       for (int i = 0; i < 5; i++)
-       {
-           if ((snakeSegments[0].x == fruits[i].x) && (snakeSegments[0].y == fruits[i].y))
-           {
-               num++;
-               fruits[i].x = rand() % n;
-               fruits[i].y = rand() % m;
-           }
-
-       }
-}
 int main()
 {
+    snake1.insert(sf::Vector2f(1.0f,0.0f) );
+    snake1.insert(sf::Vector2f(0.0f, 0.0f));
     ///////////////   Create Window ///////////////////
     sf::RenderWindow window(sf::VideoMode(gScreenWidth, gScreenHeight), "Snake");
 
@@ -130,14 +78,14 @@ int main()
 
         ////////////   Direction input checker  ///////////////
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-            dir = EDirection::eLeft;
+            dir = SnakeLinkedList::EDirection::eLeft;
         else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-            dir = EDirection::eRight;
+            dir = SnakeLinkedList::EDirection::eRight;
         else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-            dir = EDirection::eUp;
+            dir = SnakeLinkedList::EDirection::eUp;
         else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-            dir = EDirection::eDown;
-
+            dir = SnakeLinkedList::EDirection::eDown;
+        
 
         //////////////   Tick     /////////////////////
         if (timer > delay) { timer = 0; Tick(); }
@@ -151,22 +99,80 @@ int main()
                 sprite1.setPosition(i * spriteSize, j * spriteSize);  window.draw(sprite1);
             }
         }
-        for (int i = 0; i < num; i++)
+        /*for (int i = 0; i < num; i++)
         {
             spriteSnake.setPosition(snakeSegments[i].x*spriteSize, snakeSegments[i].y*spriteSize);
             window.draw(spriteSnake);
-        }
+        }*/
 
         for (int i = 0; i < 5; i++)
         {
             spriteSnake.setPosition(fruits[i].x * spriteSize, fruits[i].y * spriteSize);
             window.draw(spriteSnake);
         }
-
+        snake1.Draw(window);
         window.display();
         ////////////////////////////////////
     }
     std::cout << "SnakeGame: Finished" << std::endl;
 
     return 0;
+}
+
+void Tick()
+{
+    if (dead)
+    {
+        return;
+    }
+    /*for (int i = num; i > 0; --i)
+    {
+        snakeSegments[i].x = snakeSegments[i - 1].x;
+        snakeSegments[i].y = snakeSegments[i - 1].y;
+    }*/
+
+    //Move 
+
+
+    /*if (dir == (lastDir + 2) % 4)
+    {
+        dir = lastDir;
+    }
+    switch (dir)
+    {
+    case EDirection::eUp:
+        snake1.head->position.y -= 1;
+        break;
+    case EDirection::eLeft:
+        snake1.head->position.x -= 1;
+        break;
+    case EDirection::eRight:
+        snake1.head->position.x += 1;
+        break;
+    case EDirection::eDown:
+        snake1.head->position.y += 1;
+        break;
+    }*/
+    snake1.Move(dir);
+    for (int i = num; i > 1; --i)
+    {
+
+        if (snakeSegments[0].x == snakeSegments[i].x && snakeSegments[0].y == snakeSegments[i].y)
+        {
+            /*dead = true;*/
+        }
+    }
+
+        //check for collision
+       lastDir = dir;
+       for (int i = 0; i < 5; i++)
+       {
+           if ((snakeSegments[0].x == fruits[i].x) && (snakeSegments[0].y == fruits[i].y))
+           {
+               num++;
+               fruits[i].x = rand() % n;
+               fruits[i].y = rand() % m;
+           }
+
+       }
 }
