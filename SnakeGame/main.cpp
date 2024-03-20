@@ -30,12 +30,14 @@ int gScreenHeight{ spriteSize * m };
 int dir, lastDir, num = 5;
 bool dead;
 struct Pos
-{   float x, y;   } snakeSegments[100], fruits[5];
+{
+    sf::Vector2f pos;
+} fruits[5];
 
 int main()
 {
-    snake1.insert(sf::Vector2f(1.0f,0.0f) );
-    snake1.insert(sf::Vector2f(0.0f, 0.0f));
+    snake1.PushBack(sf::Vector2f(1.0f,0.0f) );
+    snake1.PushBack(sf::Vector2f(0.0f, 0.0f));
     ///////////////   Create Window ///////////////////
     sf::RenderWindow window(sf::VideoMode(gScreenWidth, gScreenHeight), "Snake");
 
@@ -50,12 +52,12 @@ int main()
 
     ///////////  Timer Setup //////
     sf::Clock clock;
-    float timer{ 0 }, delay{ 0.1 };
+    float timer{ 0 }, delay{ 0.1f };
 
     for (int i = 0; i < 5; i++)
     {
-            fruits[i].x = rand() % n;
-            fruits[i].y = rand() % m;
+            fruits[i].pos.x = rand() % n;
+            fruits[i].pos.y = rand() % m;
     }
 
     //////////////  Run Game ///////////////
@@ -91,26 +93,20 @@ int main()
         if (timer > delay) { timer = 0; Tick(); }
         ///////////////////  Drawing  /////////////////////
         window.clear(sf::Color(0,0,0,255));
-
         for (int i = 0; i < n; i++)
         {
             for (int j = 0; j < m; j++)
-            {
+            {//Background//
                 sprite1.setPosition(i * spriteSize, j * spriteSize);  window.draw(sprite1);
             }
         }
-        /*for (int i = 0; i < num; i++)
-        {
-            spriteSnake.setPosition(snakeSegments[i].x*spriteSize, snakeSegments[i].y*spriteSize);
-            window.draw(spriteSnake);
-        }*/
-
         for (int i = 0; i < 5; i++)
-        {
-            spriteSnake.setPosition(fruits[i].x * spriteSize, fruits[i].y * spriteSize);
+        {//fruit//
+            spriteSnake.setPosition(fruits[i].pos.x * spriteSize, fruits[i].pos.y * spriteSize);
             window.draw(spriteSnake);
         }
-        snake1.Draw(window);
+        snake1.Draw(window);//snake
+
         window.display();
         ////////////////////////////////////
     }
@@ -154,25 +150,24 @@ void Tick()
         break;
     }*/
     snake1.Move(dir);
-    for (int i = num; i > 1; --i)
-    {
+    // check self collision and kill
+    //for (int i = num; i > 1; --i)
+    //{
 
-        if (snakeSegments[0].x == snakeSegments[i].x && snakeSegments[0].y == snakeSegments[i].y)
-        {
-            /*dead = true;*/
-        }
-    }
+    //    if (snakeSegments[0].x == snakeSegments[i].x && snakeSegments[0].y == snakeSegments[i].y)
+    //    {
+    //        /*dead = true;*/
+    //    }
+    //}
 
         //check for collision
-       lastDir = dir;
        for (int i = 0; i < 5; i++)
        {
-           if ((snakeSegments[0].x == fruits[i].x) && (snakeSegments[0].y == fruits[i].y))
+           if (snake1.head->position == fruits[i].pos)
            {
-               num++;
-               fruits[i].x = rand() % n;
-               fruits[i].y = rand() % m;
+               //snake1.PushBack(/*NEED A POSITION*/);
+               fruits[i].pos.x = rand() % n;
+               fruits[i].pos.y = rand() % m;
            }
-
        }
 }

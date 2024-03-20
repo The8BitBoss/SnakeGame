@@ -15,8 +15,13 @@ public:
 	sf::Texture t;
 	sf::Sprite s;
 	Node* head;
-	SnakeLinkedList(sf::Vector2f headpos);
+	SnakeLinkedList(sf::Vector2f headPos);
 	~SnakeLinkedList() {}
+	int Size();
+	void PushFront(sf::Vector2f headPos);
+	void PushBack(sf::Vector2f pos);
+	void PopBack();
+
 	void Move(int dir);
 	int lastDir;
 	enum EDirection
@@ -26,7 +31,7 @@ public:
 		eLeft,
 		eUp
 	};
-	void insert(sf::Vector2f pos);
+
 	void Draw(sf::RenderWindow& window);
 
 };
