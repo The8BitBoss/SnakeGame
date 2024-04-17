@@ -50,6 +50,32 @@ void SnakeLinkedList::PopBack()
 	}
 		delete tmp;
 }
+bool SnakeLinkedList::DataCheck(int x, int y)
+{
+	Node* node = head;
+	while (node != nullptr)
+	{
+		if (node->position.x == x && node->position.y == y)
+		{
+			return true;
+		}
+		node = node->nextUp;
+	}
+	return false;
+}
+
+std::unordered_set<int> SnakeLinkedList::CreateHash()
+{
+	std::unordered_set<int> hashSet;
+	Node* node = head;
+	while (node != nullptr) {
+		// Hash the coordinates to a single integer
+		int hash = node->position.x * 100 + node->position.y;
+		hashSet.insert(hash);
+		node = node->nextUp;
+	}
+	return hashSet;
+}
 
 void SnakeLinkedList::Move(int dir)
 {
@@ -75,8 +101,14 @@ void SnakeLinkedList::Move(int dir)
 	}
 	lastDir = dir;
 	PushFront(tempPos);
-	//collision check
-	PopBack();
+	if (segDebt)
+	{
+		segDebt--;
+	}
+	else
+	{
+		PopBack();
+	}
 }
 
 void SnakeLinkedList::Draw(sf::RenderWindow& window)

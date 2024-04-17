@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <unordered_set>
 class SnakeLinkedList
 {
 public:
@@ -22,6 +23,10 @@ public:
 	void PushBack(sf::Vector2f pos);
 	void PopBack();
 
+	bool DataCheck(int x, int y);
+
+	std::unordered_set<int> CreateHash();
+
 	void Move(int dir);
 	int lastDir;
 	enum EDirection
@@ -31,6 +36,8 @@ public:
 		eLeft,
 		eUp
 	};
+	int segDebt{ 0 };
+	int score{ 0 };
 
 	void Draw(sf::RenderWindow& window);
 

@@ -18,8 +18,8 @@
 // SFML header file for graphics, there are also ones for Audio, Window, System and Network
 #include <SFML/Graphics.hpp>
 void Tick();
+std::vector<SnakeLinkedList> snakes;
 
-SnakeLinkedList snake1(sf::Vector2f(0,0));
 
 int n{ 50 }, m{ 37 };
 int spriteSize{ 16 };
@@ -31,13 +31,64 @@ int dir, lastDir, num = 5;
 bool dead;
 struct Pos
 {
+    enum class Sprite {
+        Orange = 1,
+        Yellow,
+        Green,
+        Red,
+        Purple,
+    };
     sf::Vector2f pos;
+    int value;
+    bool dead = true;
+    int respawnTimer = 50 + rand() % 51;;
 } fruits[5];
+
+bool checkCollision(std::vector<SnakeLinkedList>& snakes)
+{
+    std::unordered_set<int> allNodes;// create set to store all nodes
+    for (auto& snake : snakes)
+    {
+        std::unordered_set<int> snakeSet = snake.CreateHash();
+        // for every node in every snake
+        for (int node : snakeSet)
+        {
+            if (allNodes.find(node) != allNodes.end())
+            {// if it is, then there's a collision between snakes
+                bool snakefound = false;
+                int index = 0;
+                for (auto& snake : snakes)
+                {
+                    index++;
+                    if (node == snake.head->position.x * 100 + snake.head->position.y)
+                    {
+                        std::cout << "snake " << index <<" has died";
+                        snakefound = true;
+                    }
+                }
+                if(!snakefound) {
+                std::cout << "Unknown snake has died";
+                    }
+                return true;
+            }
+            allNodes.insert(node);
+            // if the node is not in the set, add it to the set
+        }
+    }
+    return false;
+}
 
 int main()
 {
-    snake1.PushBack(sf::Vector2f(1.0f,0.0f) );
-    snake1.PushBack(sf::Vector2f(0.0f, 0.0f));
+    //////////////////////////////Setup()///////////////////////////////////
+    SnakeLinkedList snake1(sf::Vector2f(3, 1));
+    snake1.PushBack(sf::Vector2f(2.0f,1.0f) );
+    snake1.PushBack(sf::Vector2f(1.0f, 1.0f));
+    SnakeLinkedList snake2(sf::Vector2f(3, 5));
+    snake2.PushBack(sf::Vector2f(2.0f, 5.0f));
+    snake2.PushBack(sf::Vector2f(1.0f, 5.0f));
+    snakes.push_back(snake1);
+    snakes.push_back(snake2);
     ///////////////   Create Window ///////////////////
     sf::RenderWindow window(sf::VideoMode(gScreenWidth, gScreenHeight), "Snake");
 
@@ -53,13 +104,7 @@ int main()
     ///////////  Timer Setup //////
     sf::Clock clock;
     float timer{ 0 }, delay{ 0.1f };
-
-    for (int i = 0; i < 5; i++)
-    {
-            fruits[i].pos.x = rand() % n;
-            fruits[i].pos.y = rand() % m;
-    }
-
+    ///////////////////////////////////////////////////////////////////////
     //////////////  Run Game ///////////////
     while (window.isOpen())
     {
@@ -102,10 +147,17 @@ int main()
         }
         for (int i = 0; i < 5; i++)
         {//fruit//
+            if (!fruits[i].dead) {
             spriteSnake.setPosition(fruits[i].pos.x * spriteSize, fruits[i].pos.y * spriteSize);
             window.draw(spriteSnake);
+            }
+
         }
-        snake1.Draw(window);//snake
+        for (auto& snake : snakes)
+        {
+            snake.Draw(window);
+            //snake
+        }
 
         window.display();
         ////////////////////////////////////
@@ -121,53 +173,36 @@ void Tick()
     {
         return;
     }
-    /*for (int i = num; i > 0; --i)
+    for (auto& snake : snakes)
     {
-        snakeSegments[i].x = snakeSegments[i - 1].x;
-        snakeSegments[i].y = snakeSegments[i - 1].y;
-    }*/
-
-    //Move 
-
-
-    /*if (dir == (lastDir + 2) % 4)
-    {
-        dir = lastDir;
-    }
-    switch (dir)
-    {
-    case EDirection::eUp:
-        snake1.head->position.y -= 1;
-        break;
-    case EDirection::eLeft:
-        snake1.head->position.x -= 1;
-        break;
-    case EDirection::eRight:
-        snake1.head->position.x += 1;
-        break;
-    case EDirection::eDown:
-        snake1.head->position.y += 1;
-        break;
-    }*/
-    snake1.Move(dir);
-    // check self collision and kill
-    //for (int i = num; i > 1; --i)
-    //{
-
-    //    if (snakeSegments[0].x == snakeSegments[i].x && snakeSegments[0].y == snakeSegments[i].y)
-    //    {
-    //        /*dead = true;*/
-    //    }
-    //}
-
-        //check for collision
+        snake.Move(dir);
        for (int i = 0; i < 5; i++)
        {
-           if (snake1.head->position == fruits[i].pos)
+           if (!fruits[i].dead && snake.head->position == fruits[i].pos)
            {
-               //snake1.PushBack(/*NEED A POSITION*/);
-               fruits[i].pos.x = rand() % n;
-               fruits[i].pos.y = rand() % m;
+               snake.segDebt += fruits[i].value;
+               snake.score += fruits[i].value;
+               fruits[i].respawnTimer = 50 + rand() % 51;
+               fruits[i].dead = true;
+               break;
+           }
+           if (fruits[i].dead)
+           {
+               if (fruits[i].respawnTimer <= 0)
+               {
+                   fruits[i].respawnTimer = 50 + rand() % 51;
+                   fruits[i].dead = false;
+                   fruits[i].pos.x = rand() % n;
+                   fruits[i].pos.y = rand() % m;
+                   fruits[i].value = 1 + rand() % 5;
+               }
+               else 
+               {
+                fruits[i].respawnTimer--;
+               }
            }
        }
+    }
+    if (checkCollision(snakes))
+        dead = true;
 }
