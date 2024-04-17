@@ -93,13 +93,13 @@ int main()
     sf::RenderWindow window(sf::VideoMode(gScreenWidth, gScreenHeight), "Snake");
 
     //////// Load Sprites //////////
-    sf::Texture t1,tS;
-    if (!t1.loadFromFile("Assets/white.png")||!tS.loadFromFile("Assets/red.png"))
+    sf::Texture tW,tR,tO,tY,tG,tLB,tB,tP;
+    if (!tW.loadFromFile("Assets/white.png")||!tR.loadFromFile("Assets/red.png")||!tO.loadFromFile("Assets/orange.png") || !tY.loadFromFile("Assets/yellow.png") || !tG.loadFromFile("Assets/green.png") || !tLB.loadFromFile("Assets/lBlue.png") || !tB.loadFromFile("Assets/blue.png") || !tP.loadFromFile("Assets/purple.png"))
     {
         std::cout << "Texture Failed to load";
         return 0;
     }
-    sf::Sprite sprite1(t1), spriteSnake(tS);
+    sf::Sprite tileWhite(tW), tileRed(tR), tileOrange(tO), tileYellow(tY), tileGreen(tG), tileLBlue(tLB), tileBlue(tB), tilePurple(tP);
 
     ///////////  Timer Setup //////
     sf::Clock clock;
@@ -142,14 +142,35 @@ int main()
         {
             for (int j = 0; j < m; j++)
             {//Background//
-                sprite1.setPosition(i * spriteSize, j * spriteSize);  window.draw(sprite1);
+                tileWhite.setPosition(i * spriteSize, j * spriteSize);  window.draw(tileWhite);
             }
         }
         for (int i = 0; i < 5; i++)
         {//fruit//
             if (!fruits[i].dead) {
-            spriteSnake.setPosition(fruits[i].pos.x * spriteSize, fruits[i].pos.y * spriteSize);
-            window.draw(spriteSnake);
+                switch (fruits[i].value)
+                {
+                case 1:
+                    tileYellow.setPosition(fruits[i].pos.x * spriteSize, fruits[i].pos.y * spriteSize);
+                    window.draw(tileYellow);
+                    break;
+                case 2:
+                    tileLBlue.setPosition(fruits[i].pos.x * spriteSize, fruits[i].pos.y * spriteSize);
+                    window.draw(tileLBlue);
+                    break;
+                case 3:
+                    tileOrange.setPosition(fruits[i].pos.x * spriteSize, fruits[i].pos.y * spriteSize);
+                    window.draw(tileOrange);
+                    break;
+                case 4:
+                    tileRed.setPosition(fruits[i].pos.x * spriteSize, fruits[i].pos.y * spriteSize);
+                    window.draw(tileRed);
+                    break;
+                case 5:
+                    tilePurple.setPosition(fruits[i].pos.x * spriteSize, fruits[i].pos.y * spriteSize);
+                    window.draw(tilePurple);
+                    break;
+                }
             }
 
         }

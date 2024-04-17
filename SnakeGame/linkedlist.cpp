@@ -4,10 +4,9 @@
 SnakeLinkedList::SnakeLinkedList(sf::Vector2f headpos) //Constructor//
 {
 	head = new Node(headpos);
-	if (!t.loadFromFile("Assets/t.png"))
+	if (!t.loadFromFile("Assets/green.png"))
 		std::cout << "Error:Texture not loaded";
 	s = sf::Sprite(t);
-	s.setColor(sf::Color::Red);
 }
 int SnakeLinkedList::Size()
 {
