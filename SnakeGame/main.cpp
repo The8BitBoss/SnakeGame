@@ -39,7 +39,7 @@ struct Pos
         Purple,
     };
     sf::Vector2f pos;
-    int value;
+    int value{ 0 };
     bool dead = true;
     int respawnTimer = 50 + rand() % 51;;
 } fruits[5];
