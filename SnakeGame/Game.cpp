@@ -43,8 +43,8 @@ void Game::Tick() {
     {
         return;
     }
-    /*snakes.front().Move(playerDir);
-    snakes.back().Move(rand() % 4);*///Works
+    snakes.front().Move(playerDir);
+    snakes.back().Move(rand() % 4);//Works
     /*player.Move(playerDir);*/// Doesnt Work?
     for (auto& snake : snakes)
     {
