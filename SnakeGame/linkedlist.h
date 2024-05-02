@@ -13,10 +13,11 @@ public:
 		// Everytime you add a node you want the pointer nextUp to be the last linked node
 		Node(sf::Vector2f defaultPosition, Node* tempnextUp) :position(defaultPosition), nextUp(tempnextUp) {}
 	};
-	sf::Texture t;
-	sf::Sprite s;
 	Node* head;
-	SnakeLinkedList(sf::Vector2f headPos);
+	sf::Sprite s;
+	
+	SnakeLinkedList(sf::Vector2f headPos, sf::Texture& t);
+	SnakeLinkedList() {}
 	~SnakeLinkedList() {}
 	int Size();
 	void PushFront(sf::Vector2f headPos);
@@ -28,7 +29,8 @@ public:
 	std::unordered_set<int> CreateHash();
 
 	void Move(int dir);
-	int lastDir;
+	int direction{ 0 };
+	int lastDirection;
 	enum EDirection
 	{
 		eRight,

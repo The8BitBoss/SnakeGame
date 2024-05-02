@@ -1,11 +1,8 @@
 #include "linkedlist.h"
 #include <iostream>
-
-SnakeLinkedList::SnakeLinkedList(sf::Vector2f headpos) //Constructor//
+SnakeLinkedList::SnakeLinkedList(sf::Vector2f headpos, sf::Texture& t) //Constructor//
 {
 	head = new Node(headpos);
-	if (!t.loadFromFile("Assets/green.png"))
-		std::cout << "Error:Texture not loaded";
 	s = sf::Sprite(t);
 }
 int SnakeLinkedList::Size()
@@ -79,9 +76,9 @@ std::unordered_set<int> SnakeLinkedList::CreateHash()
 void SnakeLinkedList::Move(int dir)
 {
 	sf::Vector2f tempPos = head->position;
-	if (dir == (lastDir + 2) % 4)
+	if (dir == (lastDirection + 2) % 4)
 	{
-		dir = lastDir;
+		dir = lastDirection;
 	}
 	switch (dir)
 	{
@@ -98,7 +95,7 @@ void SnakeLinkedList::Move(int dir)
 		tempPos.y -= 1;
 		break;
 	}
-	lastDir = dir;
+	lastDirection = dir;
 	PushFront(tempPos);
 	if (segDebt)
 	{
