@@ -14,9 +14,10 @@ public:
 		Node(sf::Vector2f defaultPosition, Node* tempnextUp) :position(defaultPosition), nextUp(tempnextUp) {}
 	};
 	Node* head;
+	std::string name;
 	sf::Sprite s;
 	
-	SnakeLinkedList(sf::Vector2f headPos, sf::Texture& t);
+	SnakeLinkedList(sf::Vector2f headPos, sf::Texture& t, std::string name);
 	SnakeLinkedList() {}
 	~SnakeLinkedList() {}
 	int Size();

@@ -1,9 +1,9 @@
 #include "linkedlist.h"
-#include <iostream>
-SnakeLinkedList::SnakeLinkedList(sf::Vector2f headpos, sf::Texture& t) //Constructor//
+SnakeLinkedList::SnakeLinkedList(sf::Vector2f headpos, sf::Texture& t, std::string string) //Constructor//
 {
 	head = new Node(headpos);
 	s = sf::Sprite(t);
+	this->name = string;
 }
 int SnakeLinkedList::Size()
 {

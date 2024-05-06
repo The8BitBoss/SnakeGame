@@ -1,6 +1,5 @@
 #include <SFML/Graphics.hpp>
 #include "Game.h"
-#include "linkedlist.h"
 #include <iostream>
 
 Game::Game() {
@@ -11,24 +10,26 @@ Game::~Game() {
 }
 void Game::Setup() 
 {
-    ///////////////   Create Window ///////////////////
-    gScreenWidth = spriteSize * n;
-    gScreenHeight = spriteSize * m;
-    this->window = new sf::RenderWindow(sf::VideoMode(gScreenWidth, gScreenHeight), "Snake");
-    //window(sf::VideoMode(gScreenWidth, gScreenHeight), "Snake");
-
-
     //////// Load Sprites //////////
  
-   if (!tW.loadFromFile("Assets/white.png") || !tR.loadFromFile("Assets/red.png") || !tO.loadFromFile("Assets/orange.png") || !tY.loadFromFile("Assets/yellow.png")|| !tG.loadFromFile("Assets/green.png") || !tLB.loadFromFile("Assets/lBlue.png") || !tB.loadFromFile("Assets/blue.png") || !tP.loadFromFile("Assets/purple.png"))
+   if (!tW.loadFromFile("Assets/white.png") ||!tGry.loadFromFile("Assets/gray.png") ||!tKey.loadFromFile("Assets/key.png") || !tR.loadFromFile("Assets/red.png") || !tO.loadFromFile("Assets/orange.png") || !tY.loadFromFile("Assets/yellow.png") || !tG.loadFromFile("Assets/green.png") || !tLB.loadFromFile("Assets/lBlue.png") || !tB.loadFromFile("Assets/blue.png") || !tP.loadFromFile("Assets/purple.png"))
    {
         return;
    }
+   spriteSize = tW.getSize().y;
+    ///////////////   Create Window ///////////////////
+    gScreenWidth = spriteSize * n;
+    gScreenHeight = spriteSize * m;
+    scoreUI = GUI(15, m, n, tGry);
+    scoreUI.AddWidgit(2, 30, tKey);
+    this->window = new sf::RenderWindow(sf::VideoMode(gScreenWidth + scoreUI.width, gScreenHeight), "Snake");
+
+
         //////////////////////////////Setup()///////////////////////////////////
-    player = SnakeLinkedList (sf::Vector2f(3, 1), tG);
+    player = SnakeLinkedList (sf::Vector2f(3, 1), tG, "player");
     player.PushBack(sf::Vector2f(2.0f, 1.0f));
     player.PushBack(sf::Vector2f(1.0f, 1.0f));
-    SnakeLinkedList snake2(sf::Vector2f(3, 5), tG);
+    SnakeLinkedList snake2(sf::Vector2f(3, 5), tG, "Jormun");
     snake2.PushBack(sf::Vector2f(2.0f, 5.0f));
     snake2.PushBack(sf::Vector2f(1.0f, 5.0f));
     
@@ -46,6 +47,8 @@ void Game::Tick() {
     snakes.front().Move(playerDir);
     snakes.back().Move(rand() % 4);//Works
     /*player.Move(playerDir);*/// Doesnt Work?
+
+    //Mini collison function to check against only the head
     for (auto& snake : snakes)
     {
         //snake.Move(playerDir);
@@ -55,6 +58,7 @@ void Game::Tick() {
             {
                 snake.segDebt += fruits[i].value;
                 snake.score += fruits[i].value;
+                std::cout << snake.name << " " << snake.score*100<< std::endl;
                 fruits[i].respawnTimer = 50 + rand() % 51;
                 fruits[i].dead = true;
                 break;
@@ -79,7 +83,13 @@ void Game::Tick() {
     if (Collisions())
         dead = true;
 }
-bool Game::Collisions(){
+bool Game::Collisions(){// Main collision function to check against all nodes on a snake
+    /////////////////////////
+    // Note: while researching how to optimise collisions i was encouraged to use hashes to manage the collisions,
+    // while i know how they work and can impliment them as below i struggle to see how it's easier for the machine
+    // to create a hash and compare rather than just compare a vector2f, although maybe i don't truly grasp it yet   ¯\_('-')_/¯
+    //////////////////////
+
     std::unordered_set<int> allNodes;// create set to store all nodes
     for (SnakeLinkedList& snake : this->snakes)
     {
@@ -136,19 +146,15 @@ int Game::Run()
         ////////////   Direction input checker  ///////////////
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
             playerDir = SnakeLinkedList::EDirection::eLeft;
-            std::cout << "Left";
         }
         else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
             playerDir = SnakeLinkedList::EDirection::eRight;
-            std::cout << "right";
         }
         else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
             playerDir = SnakeLinkedList::EDirection::eUp;
-            std::cout << "up";
         }
         else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
             playerDir = SnakeLinkedList::EDirection::eDown;
-            std::cout << "down";
         }
 
 
@@ -163,6 +169,7 @@ int Game::Run()
                 tileWhite.setPosition(i * spriteSize, j * spriteSize);  window->draw(tileWhite);
             }
         }
+        scoreUI.Draw(*window);
         for (int i = 0; i < 5; i++)
         {//fruit//
             if (!fruits[i].dead) {

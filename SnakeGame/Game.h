@@ -1,6 +1,7 @@
 #pragma once
 
 #include "linkedlist.h"
+#include "GUI.h"
 
 class Game
 {
@@ -14,9 +15,10 @@ public:
 
     std::vector<SnakeLinkedList> snakes;
     SnakeLinkedList player;
-    int playerDir;
+    GUI scoreUI;
+    int playerDir{ 0 };
     int n{ 50 }, m{ 37 };
-    int spriteSize{ 16 };
+    int spriteSize;
 
 
     int num = 5;
@@ -36,7 +38,7 @@ public:
         int respawnTimer = 50 + rand() % 51;;
     } fruits[5];
 
-    sf::Texture tW, tR, tO, tY, tG, tLB, tB, tP;
+    sf::Texture tW, tGry, tKey, tR, tO, tY, tG, tLB, tB, tP;
 
     Game();
     ~Game();
