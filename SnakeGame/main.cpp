@@ -11,9 +11,9 @@
 #include "Game.h"
 
 // todo
-// list snake
-// die
-// border
+// die on collide with edge or node
+// Breath
+// Winner declaration and stalemate procedures
 // 
 
 // SFML header file for graphics, there are also ones for Audio, Window, System and Network

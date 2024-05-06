@@ -12,7 +12,7 @@ void Game::Setup()
 {
     //////// Load Sprites //////////
  
-   if (!tW.loadFromFile("Assets/white.png") ||!tGry.loadFromFile("Assets/gray.png") ||!tKey.loadFromFile("Assets/key.png") || !tR.loadFromFile("Assets/red.png") || !tO.loadFromFile("Assets/orange.png") || !tY.loadFromFile("Assets/yellow.png") || !tG.loadFromFile("Assets/green.png") || !tLB.loadFromFile("Assets/lBlue.png") || !tB.loadFromFile("Assets/blue.png") || !tP.loadFromFile("Assets/purple.png"))
+   if (!font.loadFromFile("Assets/slkscre.ttf") || !tW.loadFromFile("Assets/white.png") || !tGry.loadFromFile("Assets/gray.png") || !tKey.loadFromFile("Assets/key.png") || !tR.loadFromFile("Assets/red.png") || !tO.loadFromFile("Assets/orange.png") || !tY.loadFromFile("Assets/yellow.png") || !tG.loadFromFile("Assets/green.png") || !tLB.loadFromFile("Assets/lBlue.png") || !tB.loadFromFile("Assets/blue.png") || !tP.loadFromFile("Assets/purple.png"))
    {
         return;
    }
@@ -20,8 +20,15 @@ void Game::Setup()
     ///////////////   Create Window ///////////////////
     gScreenWidth = spriteSize * n;
     gScreenHeight = spriteSize * m;
+    std::cout << "Insert player name:";
+    std::cin >> playerName;
+    std::cin.clear();
     scoreUI = GUI(15, m, n, tGry);
+    scoreUI.AddWidgit(0, 0, tGry, playerName, font);
     scoreUI.AddWidgit(2, 30, tKey);
+
+        
+
     this->window = new sf::RenderWindow(sf::VideoMode(gScreenWidth + scoreUI.width, gScreenHeight), "Snake");
 
 
@@ -39,16 +46,37 @@ void Game::Setup()
 
 
 }
-void Game::Tick() {
+void Game::Tick(int botdir) {
     if (dead)
     {
         return;
     }
+    switch (ticksTillWaterLower <= 0)
+    {
+    case false:
+        ticksTillWaterLower--;
+        break;
+    case true:
+        waterlevel++;
+        if (waterlevel==m)
+        {
+            dead = true;
+            return;
+        }
+        ticksTillWaterLower = 20;
+        for (int i = 0; i < 5; i++)
+        {
+            if (fruits[i].pos.y < waterlevel - 1)
+                fruits[i].pos.y++;
+        }
+        
+    }
     snakes.front().Move(playerDir);
-    snakes.back().Move(rand() % 4);//Works
+    snakes.back().Move(botdir);//Works
     /*player.Move(playerDir);*/// Doesnt Work?
 
     //Mini collison function to check against only the head
+    int index{ 0 };
     for (auto& snake : snakes)
     {
         //snake.Move(playerDir);
@@ -57,9 +85,9 @@ void Game::Tick() {
             if (!fruits[i].dead && snake.head->position == fruits[i].pos)
             {
                 snake.segDebt += fruits[i].value;
-                snake.score += fruits[i].value;
-                std::cout << snake.name << " " << snake.score*100<< std::endl;
-                fruits[i].respawnTimer = 50 + rand() % 51;
+                snake.score += fruits[i].value * 100;
+                scoreUI.Widgits[index].Update(std::to_string(snake.score));
+                std::cout << snake.name << " " << snake.score<< std::endl;
                 fruits[i].dead = true;
                 break;
             }
@@ -67,11 +95,18 @@ void Game::Tick() {
             {
                 if (fruits[i].respawnTimer <= 0)
                 {
-                    fruits[i].respawnTimer = 50 + rand() % 51;
-                    fruits[i].dead = false;
-                    fruits[i].pos.x = rand() % n;
-                    fruits[i].pos.y = rand() % m;
                     fruits[i].value = 1 + rand() % 5;
+                    fruits[i].respawnTimer = (10*fruits[i].value) + rand() % 51;
+                    fruits[i].dead = false;
+                    do
+                    {
+                        fruits[i].pos.x = rand() % n;
+                        fruits[i].pos.y = waterlevel + rand() % (m - waterlevel);
+                    } while (CheckOverlap(i));
+                        
+                        
+
+                    
                 }
                 else
                 {
@@ -79,9 +114,15 @@ void Game::Tick() {
                 }
             }
         }
+        index++;
     }
     if (Collisions())
         dead = true;
+}
+bool Game::CheckOverlap(int i) {
+    for (int j = 0; j < 5; j++) {
+        if ((j != i) && (fruits[j].pos == fruits[i].pos)) { return true; }
+    }return false;
 }
 bool Game::Collisions(){// Main collision function to check against all nodes on a snake
     /////////////////////////
@@ -156,17 +197,71 @@ int Game::Run()
         else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
             playerDir = SnakeLinkedList::EDirection::eDown;
         }
+        ////////////WaterLevelDirectionalChecker/////////////
+        int botdir = rand() % 4;
+        for (int i = 0; i < snakes.size(); i++)
+        {
+            if (snakes[i].head->position.y > waterlevel-1) {}
 
+            else if (snakes[i].head->position.y < waterlevel-1) 
+            {
+                switch (snakes[i].lastDirection)
+                {
+                case 0:
+                case 1:
+                case 2:
+                    if (i == 0)
+                    {
+                        playerDir = 1;
+                    }
+                    else
+                    {
+                        botdir = 1;
+                    }
+                    break;
+                case 3:
+                    if (i == 0)
+                    {
+                        playerDir = BalanceFall(i);
+                    }
+                    else
+                    {
+                        botdir = BalanceFall(i);
+                    }
+                    break;
+                }
+            }else if ((snakes[i].head->position.y == waterlevel-1) &&( snakes[i].lastDirection == 1))
+            {
+                if (i == 0)
+                {
+                    playerDir = BalanceFall(i);
+                }
+                else
+                {
+                    botdir = BalanceFall(i);
+                }
+            }
+        }
+        //////////////////////////////////////////////////////
 
         //////////////   Tick     /////////////////////
-        if (timer > delay) { timer = 0; Tick(); }
+        if (timer > delay) { timer = 0; Tick(botdir); }
         ///////////////////  Drawing  /////////////////////
         window->clear(sf::Color(0, 0, 0, 255));
         for (int i = 0; i < n; i++)
         {
+            
             for (int j = 0; j < m; j++)
             {//Background//
-                tileWhite.setPosition(i * spriteSize, j * spriteSize);  window->draw(tileWhite);
+                switch (j<waterlevel)
+                {
+                case true:
+                    tileWhite.setPosition(i * spriteSize, j * spriteSize);  window->draw(tileWhite);
+                break;
+                case false:
+                    tileBlue.setPosition(i * spriteSize, j * spriteSize);  window->draw(tileBlue);
+                    break;
+                }
             }
         }
         scoreUI.Draw(*window);
@@ -211,4 +306,20 @@ int Game::Run()
    
 
     return 0;
+}
+
+int Game::BalanceFall(int i)
+{
+    int balance{ 0 };
+    SnakeLinkedList::Node* temp = snakes[i].head;
+    while (temp != nullptr) {
+        if (temp->position.x > snakes[i].head->position.x) { balance--; }
+        if (temp->position.x < snakes[i].head->position.x) { balance++; }
+        temp = temp->nextUp;
+    }
+    int tempdir;
+    if (balance < 0) tempdir = 2;
+    else if (balance > 0) tempdir = 0;
+    else { tempdir = 2 * rand() % 2; }
+    return tempdir;
 }

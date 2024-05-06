@@ -11,13 +11,16 @@ public:
 
     int gScreenWidth;
     int gScreenHeight;
+    int waterlevel{ 1 };
+    int ticksTillWaterLower{ 100 };
     sf::RenderWindow* window;
 
     std::vector<SnakeLinkedList> snakes;
     SnakeLinkedList player;
     GUI scoreUI;
+    std::string playerName;
     int playerDir{ 0 };
-    int n{ 50 }, m{ 37 };
+    int n{ 60 }, m{ 40 };
     int spriteSize;
 
 
@@ -39,16 +42,23 @@ public:
     } fruits[5];
 
     sf::Texture tW, tGry, tKey, tR, tO, tY, tG, tLB, tB, tP;
+    sf::Font font;
 
     Game();
     ~Game();
 
 	void Setup();
-	void Tick();
+	void Tick(int botdir);
+
+    bool CheckOverlap(int i);
+
+    
 
     bool Collisions();
 
     int Run();
+
+    int BalanceFall(int i);
 
 };
 
