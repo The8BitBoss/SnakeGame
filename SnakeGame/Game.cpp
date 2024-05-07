@@ -46,78 +46,66 @@ void Game::Setup()
 
 
 }
-void Game::Tick(int botdir) {
+void Game::Tick(int botdir) 
+{
     if (dead)
     {
         return;
     }
-    switch (ticksTillWaterLower <= 0)
-    {
+    LowerWater();
+    snakes.front().Move(playerDir);
+    snakes.back().Move(botdir);//Works
+    //player.Move(playerDir);// Doesnt Work?
+    //Mini collison function to check against only the head
+    CollisionSnakeFruit();
+        if (Collisions())
+            dead = true;
+    }
+void Game::CollisionSnakeFruit()
+{
+    int index{ 0 };
+    for (auto& snake : snakes){
+        for (int i = 0; i < 5; i++){
+            if (!fruits[i].dead && snake.head->position == fruits[i].pos){
+                snake.segDebt += fruits[i].value;
+                snake.score += fruits[i].value * 100;
+                scoreUI.Widgits[index].Update(std::to_string(snake.score));
+                std::cout << snake.name << " " << snake.score << std::endl;
+                fruits[i].dead = true;
+                break;
+            }
+            if (fruits[i].dead){
+                if (fruits[i].respawnTimer <= 0){
+                    fruits[i].value = 1 + rand() % 5;
+                    fruits[i].respawnTimer = (10 * fruits[i].value) + rand() % 51;
+                    fruits[i].dead = false;
+                    do{
+                        fruits[i].pos.x = rand() % n;
+                        fruits[i].pos.y = waterlevel + rand() % (m - waterlevel);
+                    } while (CheckOverlap(i));
+                }
+                else fruits[i].respawnTimer--;
+            }
+        }
+        index++;
+    }
+}
+void Game::LowerWater(){
+    switch (ticksTillWaterLower <= 0){
     case false:
         ticksTillWaterLower--;
         break;
     case true:
         waterlevel++;
-        if (waterlevel==m)
-        {
+        if (waterlevel == m){
             dead = true;
             return;
         }
         ticksTillWaterLower = 20;
-        for (int i = 0; i < 5; i++)
-        {
-            if (fruits[i].pos.y < waterlevel - 1)
-                fruits[i].pos.y++;
+        for (int i = 0; i < 5; i++){
+            if (fruits[i].pos.y < waterlevel - 1) { fruits[i].pos.y++; }
         }
-        
     }
-    snakes.front().Move(playerDir);
-    snakes.back().Move(botdir);//Works
-    /*player.Move(playerDir);*/// Doesnt Work?
-
-    //Mini collison function to check against only the head
-    int index{ 0 };
-    for (auto& snake : snakes)
-    {
-        //snake.Move(playerDir);
-        for (int i = 0; i < 5; i++)
-        {
-            if (!fruits[i].dead && snake.head->position == fruits[i].pos)
-            {
-                snake.segDebt += fruits[i].value;
-                snake.score += fruits[i].value * 100;
-                scoreUI.Widgits[index].Update(std::to_string(snake.score));
-                std::cout << snake.name << " " << snake.score<< std::endl;
-                fruits[i].dead = true;
-                break;
-            }
-            if (fruits[i].dead)
-            {
-                if (fruits[i].respawnTimer <= 0)
-                {
-                    fruits[i].value = 1 + rand() % 5;
-                    fruits[i].respawnTimer = (10*fruits[i].value) + rand() % 51;
-                    fruits[i].dead = false;
-                    do
-                    {
-                        fruits[i].pos.x = rand() % n;
-                        fruits[i].pos.y = waterlevel + rand() % (m - waterlevel);
-                    } while (CheckOverlap(i));
-                        
-                        
-
-                    
-                }
-                else
-                {
-                    fruits[i].respawnTimer--;
-                }
-            }
-        }
-        index++;
-    }
-    if (Collisions())
-        dead = true;
 }
 bool Game::CheckOverlap(int i) {
     for (int j = 0; j < 5; j++) {
@@ -132,43 +120,32 @@ bool Game::Collisions(){// Main collision function to check against all nodes on
     //////////////////////
 
     std::unordered_set<int> allNodes;// create set to store all nodes
-    for (SnakeLinkedList& snake : this->snakes)
-    {
-        std::unordered_set<int> snakeSet = snake.CreateHash();
-        // for every node in every snake
-        for (int node : snakeSet)
-        {
-            if (allNodes.find(node) != allNodes.end())
-            {// if it is, then there's a collision between snakes
+    for (SnakeLinkedList& snake : this->snakes) {
+        std::unordered_set<int> snakeSet = snake.CreateHash(); // for every node in every snake
+        for (int node : snakeSet) {
+            if (allNodes.find(node) != allNodes.end()) { // if true, then there's a collision between snakes
                 bool snakefound = false;
                 int index = 0;
-                for (auto& snake : snakes)
-                {
+                for (auto& snake : snakes) {
                     index++;
-                    if (node == snake.head->position.x * 100 + snake.head->position.y)
-                    {
+                    if (node == snake.head->position.x * 100 + snake.head->position.y) {
                         //std::cout << "snake " << index << " has died";
                         snakefound = true;
                     }
                 }
-                if (!snakefound) {
-                    //std::cout << "Unknown snake has died";
-                }
+                if (!snakefound) {}//std::cout << "Unknown snake has died";
                 return true;
             }
-            allNodes.insert(node);
-            // if the node is not in the set, add it to the set
+            allNodes.insert(node);// if the node is not in the set, add it to the set
         }
     }
     return false;
 }
-int Game::Run() 
-{
+int Game::Run() {
     Setup();
     sf::Sprite tileWhite(tW), tileRed(tR), tileOrange(tO), tileYellow(tY), tileLBlue(tLB), tileBlue(tB), tilePurple(tP);
     // window
-    while (window->isOpen())
-    {
+    while (window->isOpen()) {
         ///////////////   Timer increment ///////////////
         float time = clock.getElapsedTime().asSeconds();
         clock.restart();
@@ -176,10 +153,8 @@ int Game::Run()
 
         ////////////////// Event checker ////////////////
         sf::Event event;
-        while (window->pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-            {
+        while (window->pollEvent(event)) {
+            if (event.type == sf::Event::Closed){
                 window->close();
             }
         }
@@ -199,45 +174,31 @@ int Game::Run()
         }
         ////////////WaterLevelDirectionalChecker/////////////
         int botdir = rand() % 4;
-        for (int i = 0; i < snakes.size(); i++)
-        {
+        for (int i = 0; i < snakes.size(); i++){
             if (snakes[i].head->position.y > waterlevel-1) {}
-
-            else if (snakes[i].head->position.y < waterlevel-1) 
-            {
-                switch (snakes[i].lastDirection)
-                {
+            else if (snakes[i].head->position.y < waterlevel-1) {
+                switch (snakes[i].lastDirection){
                 case 0:
                 case 1:
                 case 2:
-                    if (i == 0)
-                    {
+                    if (i == 0){
                         playerDir = 1;
-                    }
-                    else
-                    {
+                    }else{
                         botdir = 1;
                     }
                     break;
                 case 3:
-                    if (i == 0)
-                    {
+                    if (i == 0){
                         playerDir = BalanceFall(i);
-                    }
-                    else
-                    {
+                    }else{
                         botdir = BalanceFall(i);
                     }
                     break;
                 }
-            }else if ((snakes[i].head->position.y == waterlevel-1) &&( snakes[i].lastDirection == 1))
-            {
-                if (i == 0)
-                {
+            }else if ((snakes[i].head->position.y == waterlevel-1) &&( snakes[i].lastDirection == 1)) {
+                if (i == 0){
                     playerDir = BalanceFall(i);
-                }
-                else
-                {
+                }else{
                     botdir = BalanceFall(i);
                 }
             }
@@ -248,11 +209,8 @@ int Game::Run()
         if (timer > delay) { timer = 0; Tick(botdir); }
         ///////////////////  Drawing  /////////////////////
         window->clear(sf::Color(0, 0, 0, 255));
-        for (int i = 0; i < n; i++)
-        {
-            
-            for (int j = 0; j < m; j++)
-            {//Background//
+        for (int i = 0; i < n; i++){  
+            for (int j = 0; j < m; j++){//Background//
                 switch (j<waterlevel)
                 {
                 case true:
@@ -268,8 +226,7 @@ int Game::Run()
         for (int i = 0; i < 5; i++)
         {//fruit//
             if (!fruits[i].dead) {
-                switch (fruits[i].value)
-                {
+                switch (fruits[i].value){
                 case 1:
                     tileYellow.setPosition(fruits[i].pos.x * spriteSize, fruits[i].pos.y * spriteSize);
                     window->draw(tileYellow);
@@ -294,8 +251,7 @@ int Game::Run()
             }
 
         }
-        for (auto& snake : snakes)
-        {
+        for (auto& snake : snakes){
             snake.Draw(*window);
             //snake
         }
@@ -308,8 +264,7 @@ int Game::Run()
     return 0;
 }
 
-int Game::BalanceFall(int i)
-{
+int Game::BalanceFall(int i) {
     int balance{ 0 };
     SnakeLinkedList::Node* temp = snakes[i].head;
     while (temp != nullptr) {

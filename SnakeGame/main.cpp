@@ -10,11 +10,16 @@
 #include "linkedlist.h"
 #include "Game.h"
 
-// todo
+// todo - specification
 // die on collide with edge or node
 // Breath
 // Winner declaration and stalemate procedures
 // 
+// todo - bonus points
+// Audio with sfml
+// menu (really not worth it in my eyes)
+// improve snake AI
+//
 
 // SFML header file for graphics, there are also ones for Audio, Window, System and Network
 Game game;

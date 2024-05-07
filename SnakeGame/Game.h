@@ -50,6 +50,10 @@ public:
 	void Setup();
 	void Tick(int botdir);
 
+    void CollisionSnakeFruit();
+
+    void LowerWater();
+
     bool CheckOverlap(int i);
 
     
